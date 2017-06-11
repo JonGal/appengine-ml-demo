@@ -41,7 +41,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">App Engine Guestbook</a>
+          <a class="brand" href="#">App Engine Demo</a>
           <div class="nav-collapse collapse pull-right">
             <a href="{{ url|safe }}" class="btn">{{ url_linktext }}</a>
           </div>
@@ -50,20 +50,22 @@
     </div>
     <div class="container">
       <!-- [START greetings] -->
-      {% for greeting in greetings %}
-      <div class="row">
-        {% if greeting.author %}
-          <b>{{ greeting.author.email }}
-            {% if user and user.user_id() == greeting.author.identity %}
-              (You)
+      {% if greetings %}
+          {% for greeting in greetings %}
+          <div class="row">
+              {% if greeting.author_email  %}
+              <b>{{ greeting.author_email }}
+                  {% if user and user.email() == greeting.author_email %}
+                    (You)
+                  {% endif %}
+              </b> wrote:
+            {% else %}
+              An anonymous person wrote:
             {% endif %}
-          </b> wrote:
-        {% else %}
-          An anonymous person wrote:
-        {% endif %}
-        <blockquote>{{ greeting.content }}</blockquote>
-      </div>
-      {% endfor %}
+            <blockquote>{{ greeting.content }}</blockquote>
+          </div>
+          {% endfor %}
+      {% endif %}
       <!-- [END greetings] -->
 
       <form action="/sign?guestbook_name={{ guestbook_name }}" method="post">
@@ -73,10 +75,6 @@
 
       <hr>
 
-      <form>Guestbook name:
-        <input value="{{ guestbook_name }}" name="guestbook_name">
-        <input type="submit" value="switch">
-      </form>
 
       <a href="{{ url|safe }}">{{ url_linktext }}</a>
     </div>

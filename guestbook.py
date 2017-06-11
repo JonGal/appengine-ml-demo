@@ -17,9 +17,13 @@
 # [START imports]
 import os
 import urllib
+import logging
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
+
+import googleapiclient.discovery
+
 
 import jinja2
 import webapp2
@@ -38,6 +42,26 @@ DEFAULT_GUESTBOOK_NAME = 'default_guestbook'
 # will be consistent. However, the write rate should be limited to
 # ~1/second.
 
+def call_natlang(text, encoding='UTF32'):
+
+    from oauth2client.client import GoogleCredentials
+    credentials = GoogleCredentials.get_application_default()
+
+    service = googleapiclient.discovery.build('language', 'v1')
+
+    body = {
+        'document': {
+            'type': 'PLAIN_TEXT',
+            'content': text,
+        },
+        'encoding_type': encoding,
+    }
+    request = service.documents().annotateText(body=body)
+    response = request.execute()
+
+    return response
+
+
 def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
     """Constructs a Datastore key for a Guestbook entity.
 
@@ -49,14 +73,15 @@ def guestbook_key(guestbook_name=DEFAULT_GUESTBOOK_NAME):
 # [START greeting]
 class Author(ndb.Model):
     """Sub model for representing an author."""
-    identity = ndb.StringProperty(indexed=False)
+    identity = ndb.StringProperty(indexed=True)
     email = ndb.StringProperty(indexed=False)
 
 
 class Greeting(ndb.Model):
     """A main model for representing an individual Guestbook entry."""
-    author = ndb.StructuredProperty(Author)
+    author_email = ndb.StringProperty()
     content = ndb.StringProperty(indexed=False)
+    annotated = ndb.JsonProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
 # [END greeting]
 
@@ -67,12 +92,28 @@ class MainPage(webapp2.RequestHandler):
     def get(self):
         guestbook_name = self.request.get('guestbook_name',
                                           DEFAULT_GUESTBOOK_NAME)
-        greetings_query = Greeting.query(
-            ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
-        greetings = greetings_query.fetch(10)
+        #identity_key  = self.request.get('identity')
+        #greetings_query = Greeting.query(
+            #ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
+        #greetings = greetings_query.fetch(10)
 
+        greetings = None
+        author = None
         user = users.get_current_user()
         if user:
+            #print "MainPage users: %s " % (users)
+            user_id = users.get_current_user().user_id()
+            #author = Author.query(Author.identity == user_id)
+            author = Author.get_or_insert(user_id, identity=user_id,email=users.get_current_user().email())
+            #print "MainPage author: %s " % (author)
+
+            greetings_query = Greeting.query(ancestor=author.key)
+            #greetings_query = Greeting.query(
+                #ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
+            greetings = greetings_query.fetch(10)
+            #logging.debug("Returned from query for key: %s %s " % (author.key, greetings))
+            #print "MainPage -Returned from query for key: %s %s " % (author.key, greetings)
+
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
         else:
@@ -101,20 +142,38 @@ class Guestbook(webapp2.RequestHandler):
         # single entity group will be consistent. However, the write
         # rate to a single entity group should be limited to
         # ~1/second.
-        guestbook_name = self.request.get('guestbook_name',
-                                          DEFAULT_GUESTBOOK_NAME)
-        greeting = Greeting(parent=guestbook_key(guestbook_name))
-
         if users.get_current_user():
-            greeting.author = Author(
+            user_id = users.get_current_user().user_id()
+            author = Author.query( Author.identity==user_id).get()
+            if not author:
+                author =  Author(
                     identity=users.get_current_user().user_id(),
                     email=users.get_current_user().email())
+                author.key = ndb.Key('Author', users.get_current_user().user_id())
+                author.put()
+        
+        #greeting = Greeting(parent=author)
+
+        #greeting = Greeting(parent=)
+        author_key_str = str(author.key)
+        #greeting = Greeting(parent=author_key_str)
+        greeting = Greeting(parent=author.key)
+        #greeting.author_key_str = author_key_str
+
+#        if users.get_current_user():
+            #greeting.author = Author(
+                    #identity=users.get_current_user().user_id(),
+                    #email=users.get_current_user().email())
 
         greeting.content = self.request.get('content')
+        greeting.author_email = author.email
         greeting.put()
+        #logging.debug("Returned from query for key: %s %s " % (author.key, greeting))
+        #print "Guestbook - Returned from query for key: %s %s " % (author.key, greeting)
 
-        query_params = {'guestbook_name': guestbook_name}
-        self.redirect('/?' + urllib.urlencode(query_params))
+        #query_params = {'identity': author.key}
+        #self.redirect('/?' + urllib.urlencode(query_params))
+        self.redirect('/')
 # [END guestbook]
 
 
