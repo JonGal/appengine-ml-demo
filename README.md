@@ -1,6 +1,6 @@
 # Demo for Google OnBoarding
 
-This is a quick demo meant to show how easy it is to do simple poerful things with App Engine and Google ML APIs
+This is a quick demo meant to show how easy it is to do simple powerful things with App Engine and Google ML APIs
 
 ## Products
 - [App Engine][1]
@@ -42,7 +42,7 @@ git clone https://github.com/JonGal/appengine-ml-demo.git
 
 gcloud app deploy app.yaml index.yaml --project <NAME–OF_PROJECT_YOU_CREATED>
 
-5) You will be prmopted to choose a region. Pick one closest to whereever you are demoing.
+5) You will be prompted to choose a region. Pick one closest to whereever you are demoing.
 
 6) Once the scrip ends, wait at least 15 minutes for all the indexes to finish building.
 
