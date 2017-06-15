@@ -22,9 +22,10 @@ This is a quick demo meant to show how easy it is to do simple powerful things w
 [2]: https://python.org
 [3]: https://developers.google.com/appengine/docs/python/ndb/
 [4]: https://developers.google.com/appengine/docs/python/users/
-[5]: http://webapp-improved.appspot.com/
-[6]: http://jinja.pocoo.org/docs/
-[7]: http://twitter.github.com/bootstrap/
+[5]: https://cloud.google.com/natural-language/docs/
+[6]: http://webapp-improved.appspot.com/
+[7]: http://jinja.pocoo.org/docs/
+[8]: http://twitter.github.com/bootstrap/
 
 ## To Install
 
