@@ -1,10 +1,6 @@
-# Guestbook
+# Demo for Google OnBoarding
 
-Guestbook is an example application showing basic usage of Google App
-Engine. Users can read & write text messages and optionally log-in with
-their Google account. Messages are stored in App Engine (NoSQL)
-High Replication Datastore (HRD) and retrieved using a strongly consistent
-(ancestor) query.
+This is a quick demo meant to show how easy it is to do simple poerful things with App Engine and Google ML APIs
 
 ## Products
 - [App Engine][1]
@@ -15,11 +11,12 @@ High Replication Datastore (HRD) and retrieved using a strongly consistent
 ## APIs
 - [NDB Datastore API][3]
 - [Users API][4]
+- [Natural Language API] [5]
 
 ## Dependencies
-- [webapp2][5]
-- [jinja2][6]
-- [Twitter Bootstrap][7]
+- [webapp2][6]
+- [jinja2][7]
+- [Twitter Bootstrap][8]
 
 [1]: https://developers.google.com/appengine
 [2]: https://python.org
@@ -29,24 +26,32 @@ High Replication Datastore (HRD) and retrieved using a strongly consistent
 [6]: http://jinja.pocoo.org/docs/
 [7]: http://twitter.github.com/bootstrap/
 
+## To Install
 
-## E2E Test for this sample app
+1) Install the Google Cloud API
+See steps 1-5 here: https://cloud.google.com/compute/docs/tutorials/python-guide 
+Keep track of the name of the project you just created.
 
-A Makefile is provided to deploy and run the e2e test.
+2) Clone this repo locally
 
-To run:
+git clone https://github.com/JonGal/appengine-ml-demo.git
 
-     export GAE_PROJECT=your-project-id
-     make
+3) Change to the appengine-ml-demo directory
 
-To manually run, install the requirements
+4) Upload the application into the project you created in the first step
 
-    pip install -r e2e/requirements-dev.txt
+gcloud app deploy app.yaml index.yaml --project <NAME–OF_PROJECT_YOU_CREATED>
 
-Set the environment variable to point to your deployed app:
+5) You will be prmopted to choose a region. Pick one closest to whereever you are demoing.
 
-    export GUESTBOOK_URL="http://guestbook-test-dot-useful-temple-118922.appspot.com/"
+6) Once the scrip ends, wait at least 15 minutes for all the indexes to finish building.
 
-Finally, run the test
+7) Go back to the Google Console. Choose API Explorer
 
-    python e2e/test_e2e.py
+8) Click on Library (left hand column)
+
+9) Click on Natural Lnaguage API.
+
+10) Click on Enable.
+
+That's it! You are ready to go!
