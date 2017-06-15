@@ -11,7 +11,7 @@ This is a quick demo meant to show how easy it is to do simple powerful things w
 ## APIs
 - [NDB Datastore API][3]
 - [Users API][4]
-- [Natural Language API] [5]
+- [Natural Language API][5]
 
 ## Dependencies
 - [webapp2][6]
