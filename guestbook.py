@@ -16,6 +16,7 @@
 
 # [START imports]
 import os
+import json
 import urllib
 import logging
 
@@ -54,6 +55,11 @@ def call_natlang(text, encoding='UTF32'):
             'type': 'PLAIN_TEXT',
             'content': text,
         },
+        'features':{
+            "extractSyntax": False,
+            "extractEntities": False,
+            "extractDocumentSentiment": True
+        },
         'encoding_type': encoding,
     }
     request = service.documents().annotateText(body=body)
@@ -75,6 +81,7 @@ class Author(ndb.Model):
     """Sub model for representing an author."""
     identity = ndb.StringProperty(indexed=True)
     email = ndb.StringProperty(indexed=False)
+    nickname = ndb.StringProperty(indexed=False)
 
 
 class Greeting(ndb.Model):
@@ -92,27 +99,16 @@ class MainPage(webapp2.RequestHandler):
     def get(self):
         guestbook_name = self.request.get('guestbook_name',
                                           DEFAULT_GUESTBOOK_NAME)
-        #identity_key  = self.request.get('identity')
-        #greetings_query = Greeting.query(
-            #ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
-        #greetings = greetings_query.fetch(10)
 
         greetings = None
         author = None
         user = users.get_current_user()
         if user:
-            #print "MainPage users: %s " % (users)
             user_id = users.get_current_user().user_id()
-            #author = Author.query(Author.identity == user_id)
-            author = Author.get_or_insert(user_id, identity=user_id,email=users.get_current_user().email())
-            #print "MainPage author: %s " % (author)
+            author = Author.get_or_insert(user_id, identity=user_id,email=users.get_current_user().email(), nickname = user.nickname())
 
-            greetings_query = Greeting.query(ancestor=author.key)
-            #greetings_query = Greeting.query(
-                #ancestor=guestbook_key(guestbook_name)).order(-Greeting.date)
-            greetings = greetings_query.fetch(10)
-            #logging.debug("Returned from query for key: %s %s " % (author.key, greetings))
-            #print "MainPage -Returned from query for key: %s %s " % (author.key, greetings)
+            greetings_query = Greeting.query(ancestor=author.key).order(-Greeting.date)
+            greetings = greetings_query.fetch(25)
 
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
@@ -152,27 +148,15 @@ class Guestbook(webapp2.RequestHandler):
                 author.key = ndb.Key('Author', users.get_current_user().user_id())
                 author.put()
         
-        #greeting = Greeting(parent=author)
 
-        #greeting = Greeting(parent=)
         author_key_str = str(author.key)
-        #greeting = Greeting(parent=author_key_str)
         greeting = Greeting(parent=author.key)
-        #greeting.author_key_str = author_key_str
-
-#        if users.get_current_user():
-            #greeting.author = Author(
-                    #identity=users.get_current_user().user_id(),
-                    #email=users.get_current_user().email())
 
         greeting.content = self.request.get('content')
         greeting.author_email = author.email
+        greeting.annotated =  call_natlang(greeting.content)
         greeting.put()
-        #logging.debug("Returned from query for key: %s %s " % (author.key, greeting))
-        #print "Guestbook - Returned from query for key: %s %s " % (author.key, greeting)
 
-        #query_params = {'identity': author.key}
-        #self.redirect('/?' + urllib.urlencode(query_params))
         self.redirect('/')
 # [END guestbook]
 
