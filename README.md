@@ -51,7 +51,7 @@ gcloud app deploy app.yaml index.yaml --project <NAME–OF_PROJECT_YOU_CREATED>
 
 8) Click on Library (left hand column)
 
-9) Click on Natural Lnaguage API.
+9) Click on Natural Language API.
 
 10) Click on Enable.
 
